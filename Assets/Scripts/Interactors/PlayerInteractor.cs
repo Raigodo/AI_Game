@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerInteractor : BaseSnakeInteractor
 {
-    public PlayerInteractor(SnakeEntityMutable entity) : base(entity)
+    public PlayerInteractor(SnakeEntityMutable entity, MapInteractor mapInteractor) : base(entity, mapInteractor)
     {
     }
 }

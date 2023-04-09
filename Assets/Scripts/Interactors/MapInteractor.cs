@@ -24,5 +24,6 @@ public class MapInteractor : BaseInteractor
 
     public void RemoveFoodAt(Vector2 position){
         _entity.FoodPositions.Remove(position);
+        OnRemoveFoodEvent?.Invoke(position);
     }
 }

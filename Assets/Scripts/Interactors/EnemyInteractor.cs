@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class EnemyInteractor : BaseSnakeInteractor
 {
-    public EnemyInteractor(SnakeEntityMutable entity) : base(entity)
+    public EnemyInteractor(SnakeEntityMutable entity, MapInteractor mapInteractor) : base(entity, mapInteractor)
     {
-
     }
 
 }

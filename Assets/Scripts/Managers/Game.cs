@@ -44,12 +44,11 @@ public class Game : MonoBehaviour
 
     private void OnCombatStarted(){
         SetupOnGameStartEntitesAndInteractors();
-
         OnCombatStartedEvent?.Invoke();
     }
     private void OnCombatEnded(){
 
-        OnCombatStartedEvent?.Invoke();
+        OnCombatEndedEvent?.Invoke();
         RemoveCombatRelatedEntitiesAndInteractors();
     }
 
@@ -72,12 +71,12 @@ public class Game : MonoBehaviour
             var mapEntity = mapInteractor.Entity;
             var mutableSnake =  new SnakeEntityMutable(conf.IsPlayerStarting ? mapEntity.SpawnPositions.first : mapEntity.SpawnPositions.second);
             _entitiesMap.Add(Entities.Player, mutableSnake);
-            playerInteractor = new PlayerInteractor(mutableSnake);
+            playerInteractor = new PlayerInteractor(mutableSnake, mapInteractor);
             _interactorsMap.Add(typeof(PlayerInteractor), playerInteractor);
 
             mutableSnake =  new SnakeEntityMutable(conf.IsPlayerStarting ? mapEntity.SpawnPositions.second : mapEntity.SpawnPositions.first);
             _entitiesMap.Add(Entities.Enemy, mutableSnake);
-            enemyInteractor = new EnemyInteractor(mutableSnake);
+            enemyInteractor = new EnemyInteractor(mutableSnake, mapInteractor);
             _interactorsMap.Add(typeof(EnemyInteractor), enemyInteractor);
         }
 

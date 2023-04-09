@@ -21,4 +21,5 @@ public class SnakeEntity{
     private SnakeEntityMutable _value;
     public IEnumerable<Vector2> VisitedPositions => _value.VisitedPositions;
     public Vector2 CurentPosition => _value.VisitedPositions[_value.VisitedPositions.Count-1];
+    public int VisitedPositionsCount => _value.VisitedPositions.Count;
 }

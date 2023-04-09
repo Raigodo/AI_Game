@@ -5,6 +5,7 @@ using UnityEngine;
 public class MapExample : MonoBehaviour
 {
     private const float CELL_PADDING_PERCENTAGE = 0.15f;
+    private const float FOOD_SIZE_PERCENTAGE_OF_CELL = 0.5f;
 
     [SerializeField, InspectorName("Cell Prefab")] 
     private MonoBehaviour _cellPrefab;
@@ -18,8 +19,8 @@ public class MapExample : MonoBehaviour
     private MapInteractor _mapInteractor;
     private Dictionary<Vector2, GameObject> SpawnedFoodMap = new Dictionary<Vector2, GameObject>();
     private Rect ringSize;
-    private float cellPadding;
-    private float cellSize;
+    public float cellPadding {get; private set;}
+    public float cellSize {get; private set;}
     
 
     public void SetupGrid(){
@@ -75,10 +76,8 @@ public class MapExample : MonoBehaviour
             RectTransform food = Instantiate(_foodPrefab).transform as RectTransform;
             food.SetParent(_foodHolder);
             food.localScale = Vector3.one;
-            food.localPosition = new Vector2(
-                foodPosition.x * (cellSize + cellPadding) + cellPadding + cellSize*0.5f,
-                foodPosition.y * (cellSize + cellPadding) + cellPadding + cellSize*0.5f
-            );
+            food.sizeDelta = new Vector2(cellSize*0.5f, cellSize*0.5f);
+            food.localPosition = ToWorldPosition(foodPosition);
             SpawnedFoodMap.Add(foodPosition, food.gameObject);
         }
     }
@@ -94,5 +93,12 @@ public class MapExample : MonoBehaviour
     public void OnRemoveFoodAt(Vector2 position){
         Destroy(SpawnedFoodMap[position]);
         SpawnedFoodMap.Remove(position);
+    }
+
+    public Vector2 ToWorldPosition(Vector2 position){
+        return new Vector2(
+                position.x * (cellSize + cellPadding) + cellPadding + cellSize*0.5f,
+                position.y * (cellSize + cellPadding) + cellPadding + cellSize*0.5f
+        );
     }
 }
