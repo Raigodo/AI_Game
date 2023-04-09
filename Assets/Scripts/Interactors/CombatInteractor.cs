@@ -11,30 +11,41 @@ public class CombatInteractor : BaseInteractor
         MapInteractor mapInteractor,
         SessionConfInteractor confInteractor,
         PlayerInteractor playerInteractor,
-        EnemyInteractor enemyInteractor
+        EnemyInteractor enemyInteractor,
+        AIInteractor aiInteractor
     )
     {
         Game I = Game.Instance;
         _playerInteractor = playerInteractor;
         _enemyInteractor = enemyInteractor;
-        CurrentTurnSnake = confInteractor.Entity.IsPlayerStarting ? _playerInteractor : _enemyInteractor as BaseSnakeInteractor;
+        IsPlayerTurn = confInteractor.Entity.IsPlayerStarting;
+        CurrentTurnSnake = IsPlayerTurn ? _playerInteractor : _enemyInteractor as BaseSnakeInteractor;
         _mapInteractor = mapInteractor;
+        MaxTurns = confInteractor.Entity.MaxTurnCount;
+        RemainingTurns = MaxTurns;
+        _aiInteractor = aiInteractor;
     }
 
 
     private PlayerInteractor _playerInteractor;
     private EnemyInteractor _enemyInteractor;
     private MapInteractor _mapInteractor;
+    private AIInteractor _aiInteractor;
     private bool _exampleIsUpdating = false;
     private Coroutine _coroutine_endTurnPending; 
 
     public BaseSnakeInteractor CurrentTurnSnake {get; private set;}
+    public bool IsPlayerTurn {get; private set;}
     public int PlayerScore { get; private set; } = 0;
     public int EnemyScore { get; private set; } = 0;
+    public int MaxTurns { get; private set; }
+    public int RemainingTurns { get; private set; }
+
     
 
     public Action<Vector2> OnSnakeMovedEvent;
     public Action OnAnyScoreChangedEvent;
+    public Action OnRemainingTurnsChangedEvent;
 
 
     public void TryMoveSnake(Vector2 direction){
@@ -43,6 +54,11 @@ public class CombatInteractor : BaseInteractor
             return;
         if (_exampleIsUpdating)
             return;
+        if (IsAttackMove(direction)){
+            EndCombat();
+            return;
+        }
+        
         
         CurrentTurnSnake.Move(direction);
         _exampleIsUpdating = true;
@@ -51,10 +67,27 @@ public class CombatInteractor : BaseInteractor
     }
 
     private void EndCurrentTurn(){
-        if (CurrentTurnSnake == _playerInteractor)
+        if (IsPlayerTurn)
             CurrentTurnSnake = _enemyInteractor;
         else
             CurrentTurnSnake = _playerInteractor;
+        RemainingTurns--;
+        OnRemainingTurnsChangedEvent?.Invoke();
+        IsPlayerTurn = !IsPlayerTurn;
+
+        if (!CurrentTurnSnake.HasPossibleMoves()){
+            EndCurrentTurn();
+            return;
+        }
+        
+        if (!IsPlayerTurn) 
+            TryMoveSnake(_aiInteractor.ChoseMoveDirection());
+    }
+
+    public override void OnCombatStarted()
+    {
+        if (!IsPlayerTurn) 
+            TryMoveSnake(_aiInteractor.ChoseMoveDirection());
     }
 
     private void CheckForFood(){
@@ -70,12 +103,29 @@ public class CombatInteractor : BaseInteractor
             yield return ROUTIME_WAIT_TIME;
         }
         CheckForFood();
-        // EndCurrentTurn();
+        EndCurrentTurn();
+        ProcessEndCombatConditions();
     }
 
     public void OnSnakeInteractorFinishedUpdateRoutine(){
         _exampleIsUpdating = false;
     }
 
+    private void ProcessEndCombatConditions(){
+        if (RemainingTurns > 0)
+            return;
+        EndCombat();
+    }
 
+    private void EndCombat(){
+        Game.Instance.TryEndCombat();
+    }
+
+    private bool IsAttackMove(Vector2 direction){
+        BaseSnakeInteractor opponent = IsPlayerTurn ? _enemyInteractor : _playerInteractor as BaseSnakeInteractor;
+        // Debug.Log(opponent.Entity.VisitedPositions.AsString());
+        if (opponent.Entity.VisitedPositions.Contains(CurrentTurnSnake.Entity.CurentPosition + direction))
+            return true;
+        return false;
+    }
 }

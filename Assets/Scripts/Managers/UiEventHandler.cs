@@ -24,9 +24,6 @@ public class UiEventHandler : MonoBehaviour
     private SessionConfInteractor _confInteractor;
 
     public void OnFlipStartingSideButton(){
-        if (Game.Instance.CombatInProgress)
-            return;
-        
         _confInteractor.FlipStartingSide();
     }
 

@@ -2452,6 +2452,7 @@ GameObject:
   - component: {fileID: 1834374312}
   - component: {fileID: 1834374314}
   - component: {fileID: 1834374313}
+  - component: {fileID: 1834374315}
   m_Layer: 5
   m_Name: Moves Left Label
   m_TagString: Untagged
@@ -2520,6 +2521,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1834374311}
   m_CullTransparentMesh: 1
+--- !u!114 &1834374315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834374311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bce85b4ac8064e4ca5231d1d55d0bb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1877868164
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,7 +7,7 @@ public class SnakeExample : MonoBehaviour
 {
     private const float SNAKE_HEAD_SIZE_PERCENTAGE_OF_CELL = 0.9f;
     private const float SNAKE_BODY_SIZE_PERCENTAGE_OF_CELL = 0.7f;
-    private const float SNAKE_ATOMIC_MOVE_TIME = 100f; //move multiplier
+    private const float SNAKE_ATOMIC_MOVE_TIME = 200; //move multiplier
     private readonly WaitForFixedUpdate ROUTIME_WAIT_TIME = new WaitForFixedUpdate();
 
 
@@ -42,6 +42,7 @@ public class SnakeExample : MonoBehaviour
     private void OnCombatEnded(){
         _snakeInteractor = null;
         _combatInteractor.OnSnakeMovedEvent -= OnAnySnakeMoved;
+        DeleteAllBodyParts();
     }
     
     private void OnAnySnakeMoved(Vector2 direction){
@@ -60,8 +61,9 @@ public class SnakeExample : MonoBehaviour
         bodyPart.localPosition = _mapExample.ToWorldPosition(_spawnPosition);
         bodyPart.sizeDelta = Vector2.one * (_mapExample.cellSize * sizePercentage);
     }
-    private void DeleteLastBodyPart(){
-
+    private void DeleteAllBodyParts(){
+        for (int i=transform.childCount-1; i>=0; i--)
+            Destroy(transform.GetChild(i).gameObject);
     }
 
     private IEnumerator UpdateSnakeRoutine(){

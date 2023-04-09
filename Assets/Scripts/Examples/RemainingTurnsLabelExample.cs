@@ -1,0 +1,36 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class RemainingTurnsLabelExample : MonoBehaviour
+{
+    void Awake()
+    {
+        _text = GetComponent<Text>();
+    }
+
+    public void OnEnable(){
+        _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
+        _confInteractor = Game.Instance.GetInteractor<SessionConfInteractor>();
+        _combatInteractor.OnRemainingTurnsChangedEvent += UpdateLabelText;
+    }
+    public void OnDisable(){
+        _combatInteractor.OnRemainingTurnsChangedEvent -= UpdateLabelText;
+        _combatInteractor = null;
+    }
+
+    public void Start(){
+        UpdateLabelText();
+    }
+
+    private Text _text;
+    private CombatInteractor _combatInteractor;
+    private SessionConfInteractor _confInteractor;
+
+    private void UpdateLabelText(){
+        int remainingPlayerMoves = _confInteractor.Entity.IsPlayerStarting ? 
+            _combatInteractor.RemainingTurns/2 : Mathf.CeilToInt(_combatInteractor.RemainingTurns/2f);
+        _text.text = $"Moves left: {remainingPlayerMoves}";
+    }
+}

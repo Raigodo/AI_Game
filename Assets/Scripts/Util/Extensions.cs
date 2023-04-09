@@ -23,4 +23,12 @@ public static class Extensions
         strinBuilder.Append(")");
         return strinBuilder.ToString();
     }
+
+    public static T[] Duplicate<T>(this T[] arr){
+        var duplicate = new T[arr.Length];
+        for (int i=0; i<arr.Length; i++){
+            duplicate[i] = arr[i];
+        }
+        return arr;
+    }
 }

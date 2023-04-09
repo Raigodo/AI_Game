@@ -10,8 +10,6 @@ public static class MapFactory
             new Vector2(0, dimenstions-1),
             new Vector2(dimenstions-1, 0),
             new Vector2(dimenstions-1, dimenstions-1),
-            new Vector2( 0, Mathf.CeilToInt((dimenstions-1)/2) ),
-            new Vector2( dimenstions-1, Mathf.CeilToInt(dimenstions/2) ),
             new Vector2( Mathf.CeilToInt((dimenstions-1)/2), Mathf.CeilToInt((dimenstions-1)/2) )
         };
         var spawnPositions = (new Vector2(Mathf.CeilToInt((dimenstions-1)/2f), 0), new Vector2(Mathf.CeilToInt((dimenstions-1)/2f), dimenstions-1));

@@ -55,12 +55,10 @@ public class MapExample : MonoBehaviour
         Game.OnCombatEndedEvent -= OnCombatEnded;
     }
 
-
     public void OnCombatStarted(){
         if (_mapInteractor == null) 
             _mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
         SpawnAllFood();
-        SpawnAllPlayers();
         Game.OnCombatStartedEvent += OnCombatStarted;
         Game.OnCombatEndedEvent += OnCombatEnded;
         _mapInteractor.OnRemoveFoodEvent += OnRemoveFoodAt;
@@ -69,6 +67,7 @@ public class MapExample : MonoBehaviour
         Game.OnCombatStartedEvent -= OnCombatStarted;
         Game.OnCombatEndedEvent -= OnCombatEnded;
         _mapInteractor.OnRemoveFoodEvent -= OnRemoveFoodAt;
+        RemoveAllFood();
     }
 
     private void SpawnAllFood(){
@@ -85,9 +84,6 @@ public class MapExample : MonoBehaviour
         foreach (var foodExample in SpawnedFoodMap.Values)
             Destroy(foodExample);
         SpawnedFoodMap.Clear();
-    }
-    public void SpawnAllPlayers(){
-
     }
 
     public void OnRemoveFoodAt(Vector2 position){

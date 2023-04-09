@@ -34,10 +34,24 @@ public abstract class BaseSnakeInteractor : BaseInteractor
 
     public void Move(Vector2 direction){
         Vector2 targetPosition = _entity.CurentPosition + direction;
-        Debug.Log(_entity.VisitedPositions.AsString());
+        // Debug.Log(_entity.VisitedPositions.AsString());
         if (!IsDirectionAllowedToMove(direction))
             throw new System.Exception($"invalid direction, pointing to already visited position ({targetPosition})");
         
         _entity.VisitedPositions.Add(targetPosition);
+    }
+
+    public bool HasPossibleMoves(){
+        bool isCellNotVisitedAtRight = !_entity.VisitedPositions.Contains(_entity.CurentPosition + Vector2.right);
+        bool isCellNotVisitedAtLeft = !_entity.VisitedPositions.Contains(_entity.CurentPosition + Vector2.left);
+        bool isCellNotVisitedAtTop = !_entity.VisitedPositions.Contains(_entity.CurentPosition + Vector2.up);
+        bool isCellNotVisitedAtBottom = !_entity.VisitedPositions.Contains(_entity.CurentPosition + Vector2.down);
+        if (
+            (isCellNotVisitedAtRight && IsDirectionAllowedToMove(Vector2.right))
+            || (isCellNotVisitedAtLeft && IsDirectionAllowedToMove(Vector2.left))
+            || (isCellNotVisitedAtTop && IsDirectionAllowedToMove(Vector2.up))
+            || (isCellNotVisitedAtBottom && IsDirectionAllowedToMove(Vector2.down)))
+            return true;
+        return false;
     }
 }

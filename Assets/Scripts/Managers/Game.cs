@@ -45,9 +45,12 @@ public class Game : MonoBehaviour
     private void OnCombatStarted(){
         SetupOnGameStartEntitesAndInteractors();
         OnCombatStartedEvent?.Invoke();
+        foreach (var interactor in _interactorsMap.Values)
+            interactor.OnCombatStarted();
     }
     private void OnCombatEnded(){
-
+        foreach (var interactor in _interactorsMap.Values)
+            interactor.OnCombatEnded();
         OnCombatEndedEvent?.Invoke();
         RemoveCombatRelatedEntitiesAndInteractors();
     }
@@ -59,6 +62,7 @@ public class Game : MonoBehaviour
         MapInteractor mapInteractor;
         PlayerInteractor playerInteractor;
         EnemyInteractor enemyInteractor;
+        AIInteractor aiInteractor;
 
         {    
             var mutableMap = MapFactory.Create(conf.Dimensions, conf.FoodCount);
@@ -80,18 +84,29 @@ public class Game : MonoBehaviour
             _interactorsMap.Add(typeof(EnemyInteractor), enemyInteractor);
         }
 
+        {
+            var aiEntity = new AIEntityMutable(null);
+            _entitiesMap.Add(Entities.AI, aiEntity);
+            aiInteractor = new AIInteractor(aiEntity, confInteractor, enemyInteractor);
+            _interactorsMap.Add(typeof(AIInteractor), aiInteractor);
+        }
+
         _interactorsMap.Add(typeof(CombatInteractor), new CombatInteractor(
-            mapInteractor, confInteractor, playerInteractor, enemyInteractor
+            mapInteractor, confInteractor, playerInteractor, enemyInteractor, aiInteractor
         ));
+
     }
 
     private void RemoveCombatRelatedEntitiesAndInteractors(){
         _interactorsMap.Remove(typeof(PlayerInteractor));
         _interactorsMap.Remove(typeof(EnemyInteractor));
         _interactorsMap.Remove(typeof(MapInteractor));
+        _interactorsMap.Remove(typeof(CombatInteractor));
+        _interactorsMap.Remove(typeof(AIInteractor));
         _entitiesMap.Remove(Entities.Player);
         _entitiesMap.Remove(Entities.Enemy);
         _entitiesMap.Remove(Entities.Map);
+        _entitiesMap.Remove(Entities.AI);
 
     }
 
@@ -105,7 +120,7 @@ public class Game : MonoBehaviour
     public void TryEndCombat(){
         if (!CombatInProgress)
             return;
-        OnCombatStarted();
+        OnCombatEnded();
         CombatInProgress = false;
     } 
 }
