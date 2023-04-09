@@ -67,11 +67,12 @@ public class CombatInteractor : BaseInteractor
     }
 
     private void EndCurrentTurn(){
-        if (IsPlayerTurn)
+        if (IsPlayerTurn){
+            RemainingTurns -= 1;
             CurrentTurnSnake = _enemyInteractor;
+        }
         else
             CurrentTurnSnake = _playerInteractor;
-        RemainingTurns--;
         OnRemainingTurnsChangedEvent?.Invoke();
         IsPlayerTurn = !IsPlayerTurn;
 
@@ -86,8 +87,7 @@ public class CombatInteractor : BaseInteractor
 
     public override void OnCombatStarted()
     {
-        if (!IsPlayerTurn) 
-            TryMoveSnake(_aiInteractor.ChoseMoveDirection());
+        base.OnCombatStarted();
     }
 
     private void CheckForFood(){

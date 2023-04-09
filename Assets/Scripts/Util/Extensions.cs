@@ -31,4 +31,23 @@ public static class Extensions
         }
         return arr;
     }
+
+    public static T[] DuplicateAndAdd<T>(this T[] arr, T extraItem){
+        var duplicate = new T[arr.Length+1];
+        for (int i=0; i<arr.Length; i++){
+            duplicate[i] = arr[i];
+        }
+        duplicate[arr.Length] = extraItem;
+        return arr;
+    }
+    public static T[] DuplicateAndRemove<T>(this T[] arr, T value)
+    {
+        var duplicate = new T[arr.Length-1];
+        for (int i=0; i<arr.Length; i++){
+            if (value.Equals(arr[i]))
+                continue;
+            duplicate[i] = arr[i];
+        }
+        return arr;
+    }
 }

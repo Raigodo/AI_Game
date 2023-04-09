@@ -1,13 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class StateTreeMutable
 {
-    public StateTreeMutable(MapEntity map)
+    public StateTreeMutable(MapEntity map, SessionConf conf)
     {
-        // _root = new MutableGameTreeNode(null, );
+        CurrentStateNode = new MutableStateTreeNode(null, 
+            conf.IsPlayerStarting ? new Vector2[1]{map.SpawnPositions.first} : new Vector2[1]{map.SpawnPositions.second},
+            conf.IsPlayerStarting ? new Vector2[1]{map.SpawnPositions.second} : new Vector2[1]{map.SpawnPositions.first},
+            map.FoodPositions.ToArray()
+        );
     }
     public MutableStateTreeNode CurrentStateNode;
 }
@@ -25,20 +30,19 @@ public class StateTree{
 
 
 public class MutableStateTreeNode{
-    public MutableStateTreeNode(MutableStateTreeNode parent, MutableStateTreeNode[] children, 
+    public MutableStateTreeNode(MutableStateTreeNode parent, 
         Vector2[] playerVisitedPositions, Vector2[] AIVisitedPositions, 
-        Vector2[] foodPositions, int heuristicEvaluation)
+        Vector2[] foodPositions)
     {
         Parent = parent;
-        Children = children;
+        Children = new List<MutableStateTreeNode>();
         PlayerScore = 0;
         AIScore = 0;
         PlayerVisitedPositions = playerVisitedPositions;
         this.AIVisitedPositions = AIVisitedPositions;
-        HeuristicEvaluation = heuristicEvaluation;
     }
     public MutableStateTreeNode Parent;
-    public MutableStateTreeNode[] Children;
+    public List<MutableStateTreeNode> Children;
 
     public int PlayerScore { get; private set; }
     public int AIScore { get; private set; }
@@ -60,6 +64,6 @@ public class StateTreeNode{
     public IEnumerable<Vector2> AIVisitedPositions => _mutableEntity.AIVisitedPositions;
     public IEnumerable<Vector2> FoodPositions => _mutableEntity.FoodPositions;
     public int HeuristicEvaluation => _mutableEntity.HeuristicEvaluation;
-    public IEnumerable<StateTreeNode> Children => Array.ConvertAll(_mutableEntity.Children, item => new StateTreeNode(item));
+    public IEnumerable<StateTreeNode> Children => _mutableEntity.Children.Select(item => new StateTreeNode(item));
     public StateTreeNode Parent => new StateTreeNode(_mutableEntity.Parent);
 }

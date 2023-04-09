@@ -29,8 +29,6 @@ public class RemainingTurnsLabelExample : MonoBehaviour
     private SessionConfInteractor _confInteractor;
 
     private void UpdateLabelText(){
-        int remainingPlayerMoves = _confInteractor.Entity.IsPlayerStarting ? 
-            _combatInteractor.RemainingTurns/2 : Mathf.CeilToInt(_combatInteractor.RemainingTurns/2f);
-        _text.text = $"Moves left: {remainingPlayerMoves}";
+        _text.text = $"Moves left: {_combatInteractor.RemainingTurns}";
     }
 }
