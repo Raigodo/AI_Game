@@ -38,7 +38,7 @@ public static class Extensions
             duplicate[i] = arr[i];
         }
         duplicate[arr.Length] = extraItem;
-        return arr;
+        return duplicate;
     }
     public static T[] DuplicateAndRemove<T>(this T[] arr, T value)
     {
@@ -48,6 +48,6 @@ public static class Extensions
                 continue;
             duplicate[i] = arr[i];
         }
-        return arr;
+        return duplicate;
     }
 }

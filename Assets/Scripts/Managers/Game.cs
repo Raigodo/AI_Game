@@ -85,7 +85,8 @@ public class Game : MonoBehaviour
         }
 
         {
-            var aiEntity = new AIEntityMutable(null);
+            var tree = new StateTree(StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity));
+            var aiEntity = new AIEntityMutable(tree);
             _entitiesMap.Add(Entities.AI, aiEntity);
             aiInteractor = new AIInteractor(aiEntity, confInteractor, enemyInteractor);
             _interactorsMap.Add(typeof(AIInteractor), aiInteractor);
