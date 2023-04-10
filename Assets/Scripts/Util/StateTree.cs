@@ -56,8 +56,8 @@ public class MutableStateTreeNode{
     public MutableStateTreeNode Parent;
     public List<MutableStateTreeNode> Children;
 
-    public int PlayerScore { get; private set; }
-    public int AIScore { get; private set; }
+    public int PlayerScore;
+    public int AIScore;
     public Vector2[] PlayerVisitedPositions { get; private set; }
     public Vector2[] AIVisitedPositions { get; private set; }
     public Vector2[] FoodPositions { get; private set; }
