@@ -85,7 +85,7 @@ public class Game : MonoBehaviour
         }
 
         {
-            var tree = new StateTree(StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity));
+            var tree = new StateTree(StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity, 3));
             var aiEntity = new AIEntityMutable(tree);
             _entitiesMap.Add(Entities.AI, aiEntity);
             aiInteractor = new AIInteractor(aiEntity, confInteractor, enemyInteractor);
@@ -123,5 +123,5 @@ public class Game : MonoBehaviour
             return;
         OnCombatEnded();
         CombatInProgress = false;
-    } 
+    }
 }

@@ -81,8 +81,11 @@ public class CombatInteractor : BaseInteractor
             return;
         }
         
-        if (!IsPlayerTurn) 
-            TryMoveSnake(_aiInteractor.ChoseMoveDirection());
+        if (!IsPlayerTurn) {
+            Vector2 direction = _aiInteractor.ChoseMoveDirection();
+            Debug.Log(direction);
+            TryMoveSnake(direction);
+        }
     }
 
     public override void OnCombatStarted()

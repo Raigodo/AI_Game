@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AIEntityMutable
@@ -14,7 +15,9 @@ public class AIEntityMutable
 
     public AIEntity GetImmutableInstance() => new AIEntity(this);
 
-    public IEnumerable<StateTreeNode> GetTransitionOptions() => StateTree.CurrentStateNode.Children;
+    public IEnumerable<StateTreeNode> GetTransitionOptions(){
+        return StateTree.CurrentStateNode.Children;
+    }
 }
 
 public class AIEntity{
