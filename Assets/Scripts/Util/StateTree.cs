@@ -22,9 +22,19 @@ public class StateTreeMutable
     public MutableStateTreeNode CurrentStateNode;
     private int _transitionsMade = 0;
 
-    public void TransitionToState(Vector2 newPosition){
-        // StateTreeFactory.ExposeCurrentStateRecursive(_map, CurrentStateNode,
-        //     _conf.IsPlayerStarting ? _transitionsMade%2==0 : _transitionsMade%2!=0, 3);
+    public bool HasMovesLeft(){
+        return CurrentStateNode.Children.Count() > 0;
+    }
+
+    public void TransitionToState(Vector2 newPosition, bool isPlayerTurn){
+        foreach (var child in CurrentStateNode.Children){
+            if (isPlayerTurn ? child.PlayerVisitedPositions.Last() == newPosition 
+                : child.AIVisitedPositions.Last() == newPosition )
+            {
+                CurrentStateNode = child;
+                return;
+            }
+        }
     }
 }
 

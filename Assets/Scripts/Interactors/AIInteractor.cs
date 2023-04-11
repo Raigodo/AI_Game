@@ -5,30 +5,30 @@ using UnityEngine;
 
 public class AIInteractor : BaseInteractor
 {
-    public AIInteractor(AIEntityMutable entity, 
-        SessionConfInteractor confInteractor,
-        BaseSnakeInteractor snakeInteractor)
+    public AIInteractor(AIEntityMutable entity)
     {
         _entity = entity;
-        _snakeInteractor = snakeInteractor;
         Entity = _entity.GetImmutableInstance();
     }
 
     private AIEntityMutable _entity;
-    private BaseSnakeInteractor _snakeInteractor;
-    private bool _isMinimizer;
     public AIEntity Entity { get; private set; }
 
-    public Vector2 ChoseMoveDirection(){
+    public Vector2 ChoseNewPosition(){
+        var transitionOptions = _entity.GetTransitionOptions();
         StateTreeNode chosenState = null;
-        foreach (var stateNode in _entity.GetTransitionOptions()){
+        foreach (var stateNode in transitionOptions){
             if (chosenState == null){
                 chosenState = stateNode;
                 continue;
             }
-            if (chosenState.HeuristicEvaluation < stateNode.HeuristicEvaluation)
+            if (chosenState.HeuristicEvaluation > stateNode.HeuristicEvaluation) //AI is minimizer
                 chosenState = stateNode;
         }
-        return chosenState.AIVisitedPositions.Last() - _snakeInteractor.Entity.CurentPosition;
+        return chosenState.AIVisitedPositions.Last();
+    }
+
+    private Vector2 CanlculateDirection(Vector2 from, Vector2 to){
+        return to-from;
     }
 }

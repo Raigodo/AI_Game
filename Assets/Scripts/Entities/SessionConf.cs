@@ -7,7 +7,7 @@ public class SessionConfMutable : MutableEntity<SessionConf>
     public bool IsPlayerStarting = true;
     public int FoodCount = 5;
     public int Dimensions = 5;
-    public int MaxTurnCount = 7;
+    public int MaxTurnCount = 12;
 
     public override SessionConf GetImmutableInstance() => new SessionConf(this);
 }

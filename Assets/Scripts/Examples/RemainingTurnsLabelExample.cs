@@ -13,10 +13,10 @@ public class RemainingTurnsLabelExample : MonoBehaviour
     public void OnEnable(){
         _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
         _confInteractor = Game.Instance.GetInteractor<SessionConfInteractor>();
-        _combatInteractor.OnRemainingTurnsChangedEvent += UpdateLabelText;
+        _combatInteractor.OnMoveActionPerformedEvent += UpdateLabelText;
     }
     public void OnDisable(){
-        _combatInteractor.OnRemainingTurnsChangedEvent -= UpdateLabelText;
+        _combatInteractor.OnMoveActionPerformedEvent -= UpdateLabelText;
         _combatInteractor = null;
     }
 

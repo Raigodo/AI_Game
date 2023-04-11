@@ -7,6 +7,7 @@ public class ScoreLabelExample : MonoBehaviour
 {
     [SerializeField, InspectorName("Is Player Score")] private bool _isPlayerScore;
     private CombatInteractor _combatInteractor;
+    private StateTree _tree;
 
     void Awake()
     {
@@ -24,16 +25,18 @@ public class ScoreLabelExample : MonoBehaviour
 
     public void OnCombatStarted(){
         _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-        _combatInteractor.OnAnyScoreChangedEvent += UpdateLabelText;
+        _tree = Game.Instance.GetInteractor<StateTreeInteractor>().Entity;
+        _combatInteractor.OnMoveActionPerformedEvent += UpdateLabelText;
     }
     public void OnCombatEnded(){
-        _combatInteractor.OnAnyScoreChangedEvent -= UpdateLabelText;
+        _combatInteractor.OnMoveActionPerformedEvent -= UpdateLabelText;
         _combatInteractor = null;
+        _tree = null;
     }
 
     private Text _text;
 
     private void UpdateLabelText(){
-        _text.text = $"{(_isPlayerScore ? _combatInteractor.PlayerScore : _combatInteractor.EnemyScore)}";
+        _text.text = $"{(_isPlayerScore ? _tree.CurrentStateNode.PlayerScore :  _tree.CurrentStateNode.AIScore)}";
     }
 }

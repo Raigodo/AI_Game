@@ -6,8 +6,6 @@ using System;
 public class Game : MonoBehaviour
 {
     public enum Entities{
-        Player,
-        Enemy,
         AI,
         Map,
         SessionConf
@@ -58,54 +56,40 @@ public class Game : MonoBehaviour
 
     private void SetupOnGameStartEntitesAndInteractors(){
         var confInteractor = GetInteractor<SessionConfInteractor>();
-        var conf = confInteractor.Entity;
         MapInteractor mapInteractor;
-        PlayerInteractor playerInteractor;
-        EnemyInteractor enemyInteractor;
         AIInteractor aiInteractor;
+        StateTreeInteractor treeInteractor;
 
         {    
-            var mutableMap = MapFactory.Create(conf.Dimensions, conf.FoodCount);
+            var mutableMap = MapFactory.Create(confInteractor.Entity.Dimensions, confInteractor.Entity.FoodCount);
             _entitiesMap.Add(Entities.Map, mutableMap);
             mapInteractor = new MapInteractor(mutableMap);
             _interactorsMap.Add(typeof(MapInteractor), mapInteractor);
         }
 
         {
-            var mapEntity = mapInteractor.Entity;
-            var mutableSnake =  new SnakeEntityMutable(conf.IsPlayerStarting ? mapEntity.SpawnPositions.first : mapEntity.SpawnPositions.second);
-            _entitiesMap.Add(Entities.Player, mutableSnake);
-            playerInteractor = new PlayerInteractor(mutableSnake, mapInteractor);
-            _interactorsMap.Add(typeof(PlayerInteractor), playerInteractor);
+            var mutableTree = StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity, 
+                exposingMaxDepth: confInteractor.Entity.MaxTurnCount);
+            treeInteractor = new StateTreeInteractor(mutableTree);
+            _interactorsMap.Add(typeof(StateTreeInteractor), treeInteractor);
 
-            mutableSnake =  new SnakeEntityMutable(conf.IsPlayerStarting ? mapEntity.SpawnPositions.second : mapEntity.SpawnPositions.first);
-            _entitiesMap.Add(Entities.Enemy, mutableSnake);
-            enemyInteractor = new EnemyInteractor(mutableSnake, mapInteractor);
-            _interactorsMap.Add(typeof(EnemyInteractor), enemyInteractor);
-        }
-
-        {
-            var tree = new StateTree(StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity, 3));
-            var aiEntity = new AIEntityMutable(tree);
+            var aiEntity = new AIEntityMutable(treeInteractor.Entity);
             _entitiesMap.Add(Entities.AI, aiEntity);
-            aiInteractor = new AIInteractor(aiEntity, confInteractor, enemyInteractor);
+
+            aiInteractor = new AIInteractor(aiEntity);
             _interactorsMap.Add(typeof(AIInteractor), aiInteractor);
         }
 
         _interactorsMap.Add(typeof(CombatInteractor), new CombatInteractor(
-            mapInteractor, confInteractor, playerInteractor, enemyInteractor, aiInteractor
+            mapInteractor, confInteractor, treeInteractor, aiInteractor
         ));
-
     }
 
     private void RemoveCombatRelatedEntitiesAndInteractors(){
-        _interactorsMap.Remove(typeof(PlayerInteractor));
-        _interactorsMap.Remove(typeof(EnemyInteractor));
         _interactorsMap.Remove(typeof(MapInteractor));
         _interactorsMap.Remove(typeof(CombatInteractor));
         _interactorsMap.Remove(typeof(AIInteractor));
-        _entitiesMap.Remove(Entities.Player);
-        _entitiesMap.Remove(Entities.Enemy);
+        _interactorsMap.Remove(typeof(StateTreeInteractor));
         _entitiesMap.Remove(Entities.Map);
         _entitiesMap.Remove(Entities.AI);
 

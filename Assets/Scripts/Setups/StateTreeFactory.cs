@@ -9,9 +9,9 @@ public class StateTreeFactory
 
     public static StateTreeMutable Create(MapEntity map, SessionConf conf, int exposingMaxDepth){
         var tree = new StateTreeMutable(map, conf);
-        ExposeTree(tree, map, conf, 4);
+        ExposeTree(tree, map, conf, exposingMaxDepth);
         _EvaluateTree(tree, map, conf);
-
+        // Debug.Log(tree.CurrentStateNode.HeuristicEvaluation);
         return tree;
     }
 
@@ -24,6 +24,9 @@ public class StateTreeFactory
         int exposedNodeDepth, int exposeMaxDepth)
     {
         // Debug.Log(exposedNodeDepth);
+        
+        // exposeNode.PlayerVisitedPositions.Print("player ");
+        // exposeNode.AIVisitedPositions.Print("enemy ");
         if (exposedNodeDepth >= exposeMaxDepth
             || _IsSnakesOverlaping(exposeNode)){
             return;
@@ -31,11 +34,19 @@ public class StateTreeFactory
 
         bool wasExposedNodePlayerTurn = conf.IsPlayerStarting ? exposedNodeDepth%2==0 : exposedNodeDepth%2==1;
 
-        foreach (var direction in GetAvaiableDirection(exposeNode, map, wasExposedNodePlayerTurn))
-        {
-            var newNode = _CreateChildMutableStateTreeNode(map, exposeNode, direction, wasParentPlayerTurn:wasExposedNodePlayerTurn);
+        var avaiableDirections = GetAvaiableDirection(exposeNode, map, wasExposedNodePlayerTurn);
+        if (avaiableDirections.Count() == 0){
+            var newNode = _CreateChildMutableStateTreeNode(map, exposeNode, Vector2.zero, wasParentPlayerTurn:wasExposedNodePlayerTurn);
             exposeNode.Children.Add(newNode);
         }
+        else{
+            foreach (var direction in avaiableDirections)
+            {
+                var newNode = _CreateChildMutableStateTreeNode(map, exposeNode, direction, wasParentPlayerTurn:wasExposedNodePlayerTurn);
+                exposeNode.Children.Add(newNode);
+            }
+        }
+        
 
         foreach (var child in exposeNode.Children){
             _ExposeNodeRecursive(child, map, conf, exposedNodeDepth+1, exposeMaxDepth);
@@ -95,107 +106,50 @@ public class StateTreeFactory
         bool foodFoundAndEaten = parent.FoodPositions.Contains(newPosition);
         var foodPositions = foodFoundAndEaten ? parent.FoodPositions.DuplicateAndRemove(newPosition) : parent.FoodPositions;
         var treeNode = new MutableStateTreeNode(parent, playerVisitedPosition, aiVisitedPositions, foodPositions);
+        treeNode.PlayerScore = parent.PlayerScore + ((foodFoundAndEaten && wasParentPlayerTurn) ? 1 : 0);
+        treeNode.AIScore = parent.AIScore + ((foodFoundAndEaten && !wasParentPlayerTurn) ? 1 : 0);
         return treeNode;
     }
 
     private static void _EvaluateTree(StateTreeMutable tree, MapEntity map, SessionConf conf){
-        Debug.Log(GetAnyLeaf(tree).PlayerScore);
-        Debug.Log(GetAnyLeaf(tree).AIScore);
-        // GetAnyLeaf(tree).PlayerVisitedPositions.Print();
-        // GetAnyLeaf(tree).AIVisitedPositions.Print();
-        // GetAnyLeaf(tree).FoodPositions.Print();
+        (MutableStateTreeNode node, int layer) nodeData = GetAnyLeaf(tree);
+        do{
+            EvalueateStateNodeRecursive(nodeData.node, conf.IsPlayerStarting ? nodeData.layer%2==0 : nodeData.layer%2==1);
+            nodeData.node = nodeData.node.Parent;
+            nodeData.layer--;
+        }
+        while (nodeData.layer >= 0);
     }
 
-    private static MutableStateTreeNode GetAnyLeaf(StateTreeMutable tree){
+    private static (MutableStateTreeNode, int) GetAnyLeaf(StateTreeMutable tree){
         MutableStateTreeNode node = tree.CurrentStateNode;
-        while (node.Children.Count() != 0)
+        int i=0;
+        while (node.Children.Count() != 0){
+            i++;
             node = node.Children[0];
-        return node;
+        }
+        return (node, i);
     }
 
-    private static void _EvalueateLeafStateNode(MutableStateTreeNode node){
+    private static void _EvaluateLeafStateNode(MutableStateTreeNode node){
         int scoreDifference = node.PlayerScore-node.AIScore;
-        node.HeuristicEvaluation = scoreDifference == 0 ? 0 : (int)Mathf.Sign(scoreDifference);
+        node.HeuristicEvaluation = scoreDifference == 0 ? 0 : (int) Mathf.Sign(scoreDifference);
     }
 
-    
-    // public static void ExposeCurrentStateRecursive(MapEntity map, MutableStateTreeNode currentNode, bool isPlayerTurn, int exposingDepth){
-    //     // Debug.Log("expose current state / depth = 0");
-    //     ExposeState(map, currentNode, -1, exposingDepth, isPlayerTurn);
-    // }
+    private static void EvalueateStateNodeRecursive(MutableStateTreeNode node, bool isPlayerTurn){
+        int scoreDifference = node.PlayerScore-node.AIScore;
 
-    // private static void ExposeState(MapEntity map, MutableStateTreeNode exposeTarget, int nodeDepth, int maxDepth, bool isPlayerTurn){
-    //     // Debug.Log($"expose state / depth = {nodeDepth}");
-    //     Debug.Log("iteration");
-    //     if (nodeDepth >= maxDepth 
-    //         || IsSnakesOverlaping(exposeTarget)){
-    //         exposeTarget.HeuristicEvaluation = CalculateLeafEvaluation(exposeTarget);
-    //         return;
-    //     }
-        
-    //     //is already exposed
-    //     if (exposeTarget.Children.Count > 0){
-    //         foreach (var stateNode in exposeTarget.Children){
-    //             ExposeState(map, stateNode, nodeDepth+1, maxDepth, isPlayerTurn);
-    //         return;
-    //         }
-    //     }
-    //     //expose target node
-    //     ProcessStateExposing(map, exposeTarget, !isPlayerTurn, nodeDepth, maxDepth);
-    //     // Debug.Log($"iteration {exposeTarget.PlayerVisitedPositions.Last()} {exposeTarget.AIVisitedPositions.Last()}");
-    // }
+        if (node.Children.Count() <= 0){
+            _EvaluateLeafStateNode(node);
+            return;
+        }
+        else{
+            foreach (var child in node.Children)
+                EvalueateStateNodeRecursive(child, !isPlayerTurn);
+        }
 
-    // private static void ProcessStateExposing(MapEntity map, MutableStateTreeNode exposeTarget, bool isPlayerTurn, int nodeDepth, int exposingDepth){
-    //     // Debug.Log($"expose node / depth = {nodeDepth}");
-    // }
-    
-     
-
-
-    // private static int CalculateLeafEvaluation(MutableStateTreeNode stateNode){
-    //     int scoreComparison = stateNode.PlayerScore - stateNode.AIScore; //player always maximizer, ai always minimizer
-    //     if (scoreComparison == 0) 
-    //         return 0;
-    //     else if (scoreComparison > 0) 
-    //         return 1;
-    //     else 
-    //         return -1;
-    // }
-
-    // private static void EvalueateTreeRecursive(StateTreeMutable tree, bool IsPlayerStarting){
-    //     MutableStateTreeNode lastEvaluatedNode;
-    //     int nodeLayer;
-    //     {
-    //         var leaf = GetAnyLeaf(tree);
-    //         lastEvaluatedNode = leaf.node;
-    //         nodeLayer = leaf.layer;
-    //     }
-
-    //     do{
-    //         lastEvaluatedNode = lastEvaluatedNode.Parent;
-    //         EvaluateStateTreeNodeRecursive(lastEvaluatedNode, IsPlayerStarting ? nodeLayer%2==0 : nodeLayer%2==1);
-    //         lastEvaluatedNode.PrintPlayerPath();
-    //     }
-    //     while (nodeLayer >= 0);
-    // }
-
-    // private static void EvaluateStateTreeNodeRecursive(MutableStateTreeNode node, bool IsPlayerTurn){
-    //     foreach (var child in node.Children){
-    //         if (child.HeuristicEvaluation != null)
-    //             continue;
-    //         EvaluateStateTreeNodeRecursive(child, !IsPlayerTurn);
-    //     }
-    // }
-
-    
-
-    // private static (MutableStateTreeNode node, int layer) GetAnyLeaf(StateTreeMutable tree){
-    //     MutableStateTreeNode current = tree.CurrentStateNode;
-    //     int currentLayer = 0;
-    //     while (current.Children.Count > 0){
-    //         currentLayer++;
-    //         current = current.Children[0];
-    //     }
-    //     return (current, currentLayer);
-    // }
+        node.HeuristicEvaluation = isPlayerTurn ? 
+            node.Children.Max(child => child.HeuristicEvaluation) : 
+            node.Children.Min(child => child.HeuristicEvaluation);
+    }
 }

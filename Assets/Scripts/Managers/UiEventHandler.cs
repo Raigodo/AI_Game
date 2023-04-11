@@ -38,7 +38,7 @@ public class UiEventHandler : MonoBehaviour
 
     public void OnMoveButton(Vector2 direction){
         var combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-        combatInteractor.TryMoveSnake(direction);
+        combatInteractor.PlayerMoveInput(direction);
     }
 
     
@@ -49,5 +49,12 @@ public class UiEventHandler : MonoBehaviour
     private void OnCombatEnded(){
         _homeUI.SetActive(true);
         _combatUI.SetActive(false);
+    }
+
+    public void Update(){
+        if (Input.GetKeyDown(KeyCode.Space) && Game.Instance.CombatInProgress){
+            var _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
+            _combatInteractor.ProcessAITurn();
+        }
     }
 }
