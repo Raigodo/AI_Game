@@ -24,20 +24,23 @@ public class CombatInteractor : BaseInteractor
         _treeInteractor = treeInteractor;
     }
 
+    public Action<int> OnRemainingTurnsChangedEvent;
 
     private MapInteractor _mapInteractor;
     private AIInteractor _aiInteractor;
     private StateTreeInteractor _treeInteractor;
-    private bool _exampleIsUpdating = false;
     private Coroutine _coroutine_endTurnPending; 
 
     public bool IsPlayerTurn {get; private set;}
     public int MaxTurns { get; private set; }
     public int RemainingTurns { get; private set; }
 
-    
 
-    public Action OnMoveActionPerformedEvent;
+    public override void OnCombatStarted()
+    {
+        base.OnCombatStarted();
+        _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
+    }
 
 
     public void PlayerMoveInput(Vector2 direction){
@@ -49,8 +52,9 @@ public class CombatInteractor : BaseInteractor
         _treeInteractor.TransitionToState(direction + _treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last(), true);
         Debug.Log($"Player move {_treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last()}");
         RemainingTurns--;
+        OnRemainingTurnsChangedEvent?.Invoke(RemainingTurns);
         IsPlayerTurn = !IsPlayerTurn;
-        OnMoveActionPerformedEvent?.Invoke();
+        _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
         TryEndCombat();
     }
 
@@ -60,8 +64,9 @@ public class CombatInteractor : BaseInteractor
         _treeInteractor.TransitionToState(_aiInteractor.ChoseNewPosition(), isPlayerTurn:false);
         Debug.Log($"AI move {_treeInteractor.Entity.CurrentStateNode.AIVisitedPositions.Last()}");
         RemainingTurns--;
+        OnRemainingTurnsChangedEvent?.Invoke(RemainingTurns);
         IsPlayerTurn = !IsPlayerTurn;
-        OnMoveActionPerformedEvent?.Invoke();
+        _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
         TryEndCombat();
     }
 

@@ -16,9 +16,10 @@ public class MapExample : MonoBehaviour
     [SerializeField, InspectorName("Food holder")] 
     private RectTransform _foodHolder;
     
-    private MapInteractor _mapInteractor;
     private Dictionary<Vector2, GameObject> SpawnedFoodMap = new Dictionary<Vector2, GameObject>();
     private Rect ringSize;
+    private StateTree _tree;
+    private MapInteractor _mapInteractor;
     public float cellPadding {get; private set;}
     public float cellSize {get; private set;}
     
@@ -56,22 +57,24 @@ public class MapExample : MonoBehaviour
     }
 
     public void OnCombatStarted(){
-        if (_mapInteractor == null) 
-            _mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
-        SpawnAllFood();
-        Game.OnCombatStartedEvent += OnCombatStarted;
-        Game.OnCombatEndedEvent += OnCombatEnded;
-        _mapInteractor.OnRemoveFoodEvent += OnRemoveFoodAt;
+        _tree = Game.Instance.GetInteractor<StateTreeInteractor>().Entity;
+        _mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
+        _mapInteractor.OnDisplayStateEvent += DisplayState;
     }
     public void OnCombatEnded(){
-        Game.OnCombatStartedEvent -= OnCombatStarted;
-        Game.OnCombatEndedEvent -= OnCombatEnded;
-        _mapInteractor.OnRemoveFoodEvent -= OnRemoveFoodAt;
+        _mapInteractor.OnDisplayStateEvent -= DisplayState;
+        _mapInteractor = null;
+        _tree = null;
         RemoveAllFood();
     }
 
-    private void SpawnAllFood(){
-        foreach (Vector2 foodPosition in _mapInteractor.Entity.FoodPositions){
+    public void DisplayState(StateTreeNode node){
+        RemoveAllFood();
+        SpawnAllStateFood(node);
+    }
+
+    private void SpawnAllStateFood(StateTreeNode node){
+        foreach (Vector2 foodPosition in node.FoodPositions){
             RectTransform food = Instantiate(_foodPrefab).transform as RectTransform;
             food.SetParent(_foodHolder);
             food.localScale = Vector3.one;
@@ -84,11 +87,6 @@ public class MapExample : MonoBehaviour
         foreach (var foodExample in SpawnedFoodMap.Values)
             Destroy(foodExample);
         SpawnedFoodMap.Clear();
-    }
-
-    public void OnRemoveFoodAt(Vector2 position){
-        Destroy(SpawnedFoodMap[position]);
-        SpawnedFoodMap.Remove(position);
     }
 
     public Vector2 ToWorldPosition(Vector2 position){

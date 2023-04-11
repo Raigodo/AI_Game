@@ -5,30 +5,25 @@ using UnityEngine.UI;
 
 public class RemainingTurnsLabelExample : MonoBehaviour
 {
+    private Text _text;
+    
     void Awake()
     {
         _text = GetComponent<Text>();
     }
 
     public void OnEnable(){
-        _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-        _confInteractor = Game.Instance.GetInteractor<SessionConfInteractor>();
-        _combatInteractor.OnMoveActionPerformedEvent += UpdateLabelText;
+        var combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
+        combatInteractor.OnRemainingTurnsChangedEvent += UpdateLabelText;
+        UpdateLabelText(combatInteractor.RemainingTurns);
     }
     public void OnDisable(){
-        _combatInteractor.OnMoveActionPerformedEvent -= UpdateLabelText;
-        _combatInteractor = null;
+        var combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
+        combatInteractor.OnRemainingTurnsChangedEvent -= UpdateLabelText;
     }
 
-    public void Start(){
-        UpdateLabelText();
-    }
 
-    private Text _text;
-    private CombatInteractor _combatInteractor;
-    private SessionConfInteractor _confInteractor;
-
-    private void UpdateLabelText(){
-        _text.text = $"Moves left: {_combatInteractor.RemainingTurns}";
+    private void UpdateLabelText(int remainingTurns){
+        _text.text = $"Moves left: {remainingTurns}";
     }
 }

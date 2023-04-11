@@ -14,16 +14,9 @@ public class MapInteractor : BaseInteractor
     private MapEntityMutable _entity;
     public MapEntity Entity { get; private set; }
 
-    public bool IsFoodAtPosition(Vector2 checkPosition){
-        if (_entity.FoodPositions.Contains(checkPosition))
-            return true;
-        return false;
-    }
+    public Action<StateTreeNode> OnDisplayStateEvent;
 
-    public Action<Vector2> OnRemoveFoodEvent;
-
-    public void RemoveFoodAt(Vector2 position){
-        _entity.FoodPositions.Remove(position);
-        OnRemoveFoodEvent?.Invoke(position);
+    public void DisplayState(StateTreeNode node){
+        OnDisplayStateEvent?.Invoke(node);
     }
 }

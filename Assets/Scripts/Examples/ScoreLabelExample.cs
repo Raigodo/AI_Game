@@ -6,8 +6,7 @@ using UnityEngine.UI;
 public class ScoreLabelExample : MonoBehaviour
 {
     [SerializeField, InspectorName("Is Player Score")] private bool _isPlayerScore;
-    private CombatInteractor _combatInteractor;
-    private StateTree _tree;
+    private Text _text;
 
     void Awake()
     {
@@ -24,19 +23,16 @@ public class ScoreLabelExample : MonoBehaviour
 
 
     public void OnCombatStarted(){
-        _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-        _tree = Game.Instance.GetInteractor<StateTreeInteractor>().Entity;
-        _combatInteractor.OnMoveActionPerformedEvent += UpdateLabelText;
+        var mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
+        mapInteractor.OnDisplayStateEvent += UpdateLabelText;
     }
     public void OnCombatEnded(){
-        _combatInteractor.OnMoveActionPerformedEvent -= UpdateLabelText;
-        _combatInteractor = null;
-        _tree = null;
+        var mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
+        mapInteractor.OnDisplayStateEvent -= UpdateLabelText;
     }
 
-    private Text _text;
 
-    private void UpdateLabelText(){
-        _text.text = $"{(_isPlayerScore ? _tree.CurrentStateNode.PlayerScore :  _tree.CurrentStateNode.AIScore)}";
+    private void UpdateLabelText(StateTreeNode node){
+        _text.text = $"{(_isPlayerScore ? node.PlayerScore :  node.AIScore)}";
     }
 }

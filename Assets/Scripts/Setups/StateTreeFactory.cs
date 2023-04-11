@@ -53,8 +53,6 @@ public class StateTreeFactory
         }
     }
 
-    private static int nodesGenerated = 0;
-
 
     private static bool _IsSnakesOverlaping(MutableStateTreeNode currentNode){
         if (currentNode.PlayerVisitedPositions.Contains(currentNode.AIVisitedPositions.Last())

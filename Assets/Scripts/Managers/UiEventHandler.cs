@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class UiEventHandler : MonoBehaviour
 {
+    public static UiEventHandler Instance;
     [SerializeField] private GameObject _homeUI;
-    [SerializeField] private GameObject _CombatResults;
-    [SerializeField] private GameObject _combatUI;
+    [SerializeField] private GameObject _combatResults;
+    [SerializeField] private GameObject _combatPanel;
+    [SerializeField] private GameObject _treePanel;
+
+    private GameObject _previousPanel;
+    private SessionConfInteractor _confInteractor;
 
 
     public void OnEnable(){
+        Instance = this;
         Game.OnCombatStartedEvent += OnCombatStarted;
         Game.OnCombatFinished_ConfirmationPendingEvent += OnCombatFinishedAndPendingConfirmation;
         Game.OnCombatEndedEvent += OnConfirmCombatEnded;
@@ -18,13 +24,13 @@ public class UiEventHandler : MonoBehaviour
         Game.OnCombatStartedEvent -= OnCombatStarted;
         Game.OnCombatFinished_ConfirmationPendingEvent -= OnCombatFinishedAndPendingConfirmation;
         Game.OnCombatEndedEvent -= OnConfirmCombatEnded;
+        Instance = null;
     }
 
     public void Start(){
         _confInteractor = Game.Instance.GetInteractor<SessionConfInteractor>();
     }
 
-    private SessionConfInteractor _confInteractor;
 
     public void OnFlipStartingSideButton(){
         _confInteractor.FlipStartingSide();
@@ -46,18 +52,38 @@ public class UiEventHandler : MonoBehaviour
         combatInteractor.PlayerMoveInput(direction);
     }
 
-    
+    public void OnViewTreeViewPanel_FromCombat(){
+        _previousPanel = _combatPanel;
+        _combatPanel.SetActive(false);
+        _treePanel.SetActive(true);
+    }
+    public void OnViewTreePanel_FromResulting(){
+        _previousPanel = _combatResults;
+        _combatResults.SetActive(false);
+        _treePanel.SetActive(true);
+    }
+    public void OnHideTreePanel(){
+        _previousPanel.SetActive(true);
+        _treePanel.SetActive(false);
+        var currentState = Game.Instance.GetInteractor<StateTreeInteractor>().Entity.CurrentStateNode;
+        Game.Instance.GetInteractor<MapInteractor>().DisplayState(currentState);
+    }
+
     private void OnCombatStarted(){
         _homeUI.SetActive(false);
-        _combatUI.SetActive(true);
+        _combatPanel.SetActive(true);
     }
     private void OnCombatFinishedAndPendingConfirmation(){
-        _CombatResults.SetActive(true);
-        _combatUI.SetActive(false);
+        _combatResults.SetActive(true);
+        _combatPanel.SetActive(false);
     }
     private void OnConfirmCombatEnded(){
         _homeUI.SetActive(true);
-        _CombatResults.SetActive(false);
+        _combatResults.SetActive(false);
+    }
+
+    public void ShowStateNodeExampleOnMap(StateTreeNode node){
+        Game.Instance.GetInteractor<MapInteractor>().DisplayState(node);
     }
 
     public void Update(){

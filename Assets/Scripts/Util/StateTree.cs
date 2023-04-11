@@ -20,7 +20,6 @@ public class StateTreeMutable
     private MapEntity _map;
     private SessionConf _conf;
     public MutableStateTreeNode CurrentStateNode;
-    private int _transitionsMade = 0;
 
     public bool HasMovesLeft(){
         return CurrentStateNode.Children.Count() > 0;

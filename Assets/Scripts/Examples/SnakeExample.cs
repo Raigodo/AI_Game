@@ -14,8 +14,7 @@ public class SnakeExample : MonoBehaviour
     [SerializeField, InspectorName("Head Prefab")] private RectTransform _snakeHeadPrefab;
     [SerializeField, InspectorName("Map Example")]  private MapExample _mapExample;
     [SerializeField, InspectorName("Is Player")] private bool _isPlayer;
-    private CombatInteractor _combatInteractor;
-    private StateTreeInteractor _treeInteractor;
+    private MapInteractor _mapInteractor;
     private Vector2 _spawnPosition;
 
     public void OnEnable(){
@@ -29,24 +28,21 @@ public class SnakeExample : MonoBehaviour
     }
 
     private void OnCombatStarted(){
-        _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-        _treeInteractor = Game.Instance.GetInteractor<StateTreeInteractor>();
-        _spawnPosition = _isPlayer ? _treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.First()
-            : _treeInteractor.Entity.CurrentStateNode.AIVisitedPositions.First();
-        SpawnNewBodyPart(_snakeHeadPrefab, SNAKE_HEAD_SIZE_PERCENTAGE_OF_CELL, _spawnPosition);
-
-        _combatInteractor.OnMoveActionPerformedEvent += UpdateSnakePositions;
+        var currentNode = Game.Instance.GetInteractor<StateTreeInteractor>().Entity.CurrentStateNode;
+        _mapInteractor = Game.Instance.GetInteractor<MapInteractor>();
+        _spawnPosition = _isPlayer ? currentNode.PlayerVisitedPositions.First() : currentNode.AIVisitedPositions.First();
+        Debug.Log("snake combat start");
+        _mapInteractor.OnDisplayStateEvent += DisplayStateActor;
     }
     private void OnCombatEnded(){
-        _combatInteractor.OnMoveActionPerformedEvent -= UpdateSnakePositions;
-        _combatInteractor = null;
-        _treeInteractor = null;
+        _mapInteractor.OnDisplayStateEvent -= DisplayStateActor;
         DeleteAllBodyParts();
     }
 
-    private void UpdateSnakePositions(){
+
+    public void DisplayStateActor(StateTreeNode node){
         DeleteAllBodyParts();
-        SpawnAllBodyParts();
+        SpawnAllBodyParts(node);
     }
 
     private void SpawnNewBodyPart(RectTransform prefab, float sizePercentage, Vector2 position){
@@ -56,9 +52,8 @@ public class SnakeExample : MonoBehaviour
         bodyPart.localPosition = _mapExample.ToWorldPosition(position);
         bodyPart.sizeDelta = Vector2.one * (_mapExample.cellSize * sizePercentage);
     }
-    private void SpawnAllBodyParts(){
-        var visitedPositions = _isPlayer ? _treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions 
-            : _treeInteractor.Entity.CurrentStateNode.AIVisitedPositions;
+    private void SpawnAllBodyParts(StateTreeNode node){
+        var visitedPositions = _isPlayer ? node.PlayerVisitedPositions : node.AIVisitedPositions;
         SpawnNewBodyPart(_snakeHeadPrefab, SNAKE_HEAD_SIZE_PERCENTAGE_OF_CELL, visitedPositions.Last());
         for (int i=0; i<visitedPositions.Count()-1; i++){
             SpawnNewBodyPart(_atomicSnakeBodyPrefab, SNAKE_BODY_SIZE_PERCENTAGE_OF_CELL, visitedPositions.ElementAt(i));
