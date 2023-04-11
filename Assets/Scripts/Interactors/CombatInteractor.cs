@@ -42,6 +42,10 @@ public class CombatInteractor : BaseInteractor
 
     public void PlayerMoveInput(Vector2 direction){
         if (!IsPlayerTurn) return;
+        if (!_treeInteractor.IsDirectionValid(direction, true)){
+            Debug.Log("invalid direction");
+            return;
+        }
         _treeInteractor.TransitionToState(direction + _treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last(), true);
         Debug.Log($"Player move {_treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last()}");
         RemainingTurns--;
@@ -65,7 +69,7 @@ public class CombatInteractor : BaseInteractor
         if (_treeInteractor.Entity.CurrentStateNode.Children.Count() > 0)
             return;
         Debug.Log("end combat");
-        // EndCombat();
+        EndCombat();
     }
 
     private void EndCombat(){

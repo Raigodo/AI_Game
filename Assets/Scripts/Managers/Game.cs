@@ -14,6 +14,7 @@ public class Game : MonoBehaviour
 
 
     public static Action OnCombatStartedEvent;
+    public static Action OnCombatFinished_ConfirmationPendingEvent;
     public static Action OnCombatEndedEvent;
 
 
@@ -105,7 +106,23 @@ public class Game : MonoBehaviour
     public void TryEndCombat(){
         if (!CombatInProgress)
             return;
-        OnCombatEnded();
         CombatInProgress = false;
+        IsCombatEndConfirmed = false;
+        OnCombatFinished_ConfirmationPendingEvent?.Invoke();
+        StartCoroutine(WaitForEndCombatConfirmedRoutine());
+    }
+
+
+
+    private bool IsCombatEndConfirmed;
+    
+    private IEnumerator WaitForEndCombatConfirmedRoutine(){
+        while (!IsCombatEndConfirmed)
+            yield return null;
+        OnCombatEnded();
+    }
+
+    public void OnEndCombatConfirmed(){
+        IsCombatEndConfirmed = true;
     }
 }

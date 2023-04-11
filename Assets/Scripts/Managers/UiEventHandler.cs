@@ -5,16 +5,19 @@ using UnityEngine;
 public class UiEventHandler : MonoBehaviour
 {
     [SerializeField] private GameObject _homeUI;
+    [SerializeField] private GameObject _CombatResults;
     [SerializeField] private GameObject _combatUI;
 
 
     public void OnEnable(){
         Game.OnCombatStartedEvent += OnCombatStarted;
-        Game.OnCombatEndedEvent += OnCombatEnded;
+        Game.OnCombatFinished_ConfirmationPendingEvent += OnCombatFinishedAndPendingConfirmation;
+        Game.OnCombatEndedEvent += OnConfirmCombatEnded;
     }
     public void OnDisable(){
         Game.OnCombatStartedEvent -= OnCombatStarted;
-        Game.OnCombatEndedEvent -= OnCombatEnded;
+        Game.OnCombatFinished_ConfirmationPendingEvent -= OnCombatFinishedAndPendingConfirmation;
+        Game.OnCombatEndedEvent -= OnConfirmCombatEnded;
     }
 
     public void Start(){
@@ -36,6 +39,8 @@ public class UiEventHandler : MonoBehaviour
     public void OnMoveRightButton() => OnMoveButton(Vector2.right);
     public void OnMoveLeftButton() => OnMoveButton(Vector2.left);
 
+    public void OnConfirmEndCombat() => Game.Instance.OnEndCombatConfirmed();
+
     public void OnMoveButton(Vector2 direction){
         var combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
         combatInteractor.PlayerMoveInput(direction);
@@ -46,9 +51,13 @@ public class UiEventHandler : MonoBehaviour
         _homeUI.SetActive(false);
         _combatUI.SetActive(true);
     }
-    private void OnCombatEnded(){
-        _homeUI.SetActive(true);
+    private void OnCombatFinishedAndPendingConfirmation(){
+        _CombatResults.SetActive(true);
         _combatUI.SetActive(false);
+    }
+    private void OnConfirmCombatEnded(){
+        _homeUI.SetActive(true);
+        _CombatResults.SetActive(false);
     }
 
     public void Update(){
