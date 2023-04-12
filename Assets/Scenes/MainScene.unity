@@ -2057,6 +2057,7 @@ MonoBehaviour:
   _snakeHeadPrefab: {fileID: 1031720582475446063, guid: 3743bca5e49c8f6408092568a931759e, type: 3}
   _mapExample: {fileID: 1892906122}
   _isPlayer: 0
+  _bodyColor: {r: 0.7924528, g: 0, b: 0, a: 1}
 --- !u!1 &1228855147
 GameObject:
   m_ObjectHideFlags: 0
@@ -4047,6 +4048,7 @@ MonoBehaviour:
   _snakeHeadPrefab: {fileID: 1031720582475446063, guid: 3743bca5e49c8f6408092568a931759e, type: 3}
   _mapExample: {fileID: 1892906122}
   _isPlayer: 1
+  _bodyColor: {r: 0.0072259726, g: 0.6792453, b: 0, a: 1}
 --- !u!1 &1892906117
 GameObject:
   m_ObjectHideFlags: 0
