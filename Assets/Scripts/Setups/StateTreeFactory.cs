@@ -7,10 +7,10 @@ using UnityEngine;
 public class StateTreeFactory
 {
 
-    public static StateTreeMutable Create(MapEntity map, SessionConf conf, int exposingMaxDepth){
+    public static StateTreeMutable Create(MapEntity map, SessionConf conf){
         var tree = new StateTreeMutable(map, conf);
-        ExposeTree(tree, map, conf, exposingMaxDepth);
-        _EvaluateTree(tree, map, conf);
+        ExposeTree(tree, map, conf, conf.MaxTurnCount);
+        EvaluateTree(tree, map, conf);
         // Debug.Log(tree.CurrentStateNode.HeuristicEvaluation);
         return tree;
     }
@@ -23,10 +23,6 @@ public class StateTreeFactory
     private static void _ExposeNodeRecursive(MutableStateTreeNode exposeNode, MapEntity map, SessionConf conf, 
         int exposedNodeDepth, int exposeMaxDepth)
     {
-        // Debug.Log(exposedNodeDepth);
-        
-        // exposeNode.PlayerVisitedPositions.Print("player ");
-        // exposeNode.AIVisitedPositions.Print("enemy ");
         if (exposedNodeDepth >= exposeMaxDepth
             || _IsSnakesOverlaping(exposeNode)){
             return;
@@ -87,11 +83,6 @@ public class StateTreeFactory
             allowedDirections.Add(Vector2.down);
         
         return allowedDirections;
-        // {
-        //     var newStateNode = CreateChildMutableStateTreeNode(map, exposeTarget, turnOwnerCurrentPosition, Vector2.down, isPlayerTurn);
-        //     exposeTarget.Children.Add(newStateNode);
-        //     ExposeState(map, newStateNode, nodeDepth+1, exposingDepth, !isPlayerTurn);
-        // }
     }
 
     private static MutableStateTreeNode _CreateChildMutableStateTreeNode(MapEntity map, MutableStateTreeNode parent,
@@ -109,7 +100,7 @@ public class StateTreeFactory
         return treeNode;
     }
 
-    private static void _EvaluateTree(StateTreeMutable tree, MapEntity map, SessionConf conf){
+    private static void EvaluateTree(StateTreeMutable tree, MapEntity map, SessionConf conf){
         (MutableStateTreeNode node, int layer) nodeData = GetAnyLeaf(tree);
         do{
             EvalueateStateNodeRecursive(nodeData.node, conf.IsPlayerStarting ? nodeData.layer%2==0 : nodeData.layer%2==1);
@@ -129,7 +120,7 @@ public class StateTreeFactory
         return (node, i);
     }
 
-    private static void _EvaluateLeafStateNode(MutableStateTreeNode node){
+    private static void EvaluateLeafStateNode(MutableStateTreeNode node){
         int scoreDifference = node.PlayerScore-node.AIScore;
         node.HeuristicEvaluation = scoreDifference == 0 ? 0 : (int) Mathf.Sign(scoreDifference);
     }
@@ -138,7 +129,7 @@ public class StateTreeFactory
         int scoreDifference = node.PlayerScore-node.AIScore;
 
         if (node.Children.Count() <= 0){
-            _EvaluateLeafStateNode(node);
+            EvaluateLeafStateNode(node);
             return;
         }
         else{

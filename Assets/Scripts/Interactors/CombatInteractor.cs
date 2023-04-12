@@ -15,7 +15,6 @@ public class CombatInteractor : BaseInteractor
         AIInteractor aiInteractor
     )
     {
-        Game I = Game.Instance;
         IsPlayerTurn = confInteractor.Entity.IsPlayerStarting;
         _mapInteractor = mapInteractor;
         MaxTurns = confInteractor.Entity.MaxTurnCount;

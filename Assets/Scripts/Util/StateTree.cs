@@ -31,6 +31,7 @@ public class StateTreeMutable
                 : child.AIVisitedPositions.Last() == newPosition )
             {
                 CurrentStateNode = child;
+                CurrentStateNode.Parent = null;
                 return;
             }
         }

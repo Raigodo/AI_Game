@@ -69,8 +69,7 @@ public class Game : MonoBehaviour
         }
 
         {
-            var mutableTree = StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity, 
-                exposingMaxDepth: confInteractor.Entity.MaxTurnCount);
+            var mutableTree = StateTreeFactory.Create(mapInteractor.Entity, confInteractor.Entity);
             treeInteractor = new StateTreeInteractor(mutableTree);
             _interactorsMap.Add(typeof(StateTreeInteractor), treeInteractor);
 
