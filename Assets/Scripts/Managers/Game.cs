@@ -17,8 +17,8 @@ public class Game : MonoBehaviour
     public static Action OnCombatFinished_ConfirmationPendingEvent;
     public static Action OnCombatEndedEvent;
 
-
     public static Game Instance;
+
 
     private Dictionary<Entities, object> _entitiesMap = new Dictionary<Entities, object>();
     private Dictionary<Type, BaseInteractor> _interactorsMap = new Dictionary<Type, BaseInteractor>();

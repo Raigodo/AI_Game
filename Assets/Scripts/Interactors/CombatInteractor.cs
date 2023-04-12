@@ -40,41 +40,43 @@ public class CombatInteractor : BaseInteractor
     {
         base.OnCombatStarted();
         _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
+        if (!IsPlayerTurn)
+            Timer.Instance.DoAfterTimer(()=>ProcessAITurn(), 0.2f);
     }
 
 
     public void PlayerMoveInput(Vector2 direction){
         if (!IsPlayerTurn) return;
         if (!_treeInteractor.IsDirectionValid(direction, true)){
-            Debug.Log("invalid direction");
             return;
         }
         _treeInteractor.TransitionToState(direction + _treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last(), true);
-        Debug.Log($"Player move {_treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last()}");
+        // Debug.Log($"Player move {_treeInteractor.Entity.CurrentStateNode.PlayerVisitedPositions.Last()}");
         RemainingTurns--;
         OnRemainingTurnsChangedEvent?.Invoke(RemainingTurns);
-        IsPlayerTurn = !IsPlayerTurn;
+        IsPlayerTurn = false;
         _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
-        TryEndCombat();
+        bool endSucceded = TryEndCombat();
+        if (!endSucceded)
+            Timer.Instance.DoAfterTimer(()=>ProcessAITurn(), 0.2f);
     }
 
-
-    public void ProcessAITurn(){
+    private void ProcessAITurn(){
         if (IsPlayerTurn) return;
         _treeInteractor.TransitionToState(_aiInteractor.ChoseNewPosition(), isPlayerTurn:false);
-        Debug.Log($"AI move {_treeInteractor.Entity.CurrentStateNode.AIVisitedPositions.Last()}");
+        // Debug.Log($"AI move {_treeInteractor.Entity.CurrentStateNode.AIVisitedPositions.Last()}");
         RemainingTurns--;
         OnRemainingTurnsChangedEvent?.Invoke(RemainingTurns);
-        IsPlayerTurn = !IsPlayerTurn;
+        IsPlayerTurn = true;
         _mapInteractor.DisplayState(_treeInteractor.Entity.CurrentStateNode);
         TryEndCombat();
     }
 
-    public void TryEndCombat(){
+    public bool TryEndCombat(){
         if (_treeInteractor.Entity.CurrentStateNode.Children.Count() > 0)
-            return;
-        Debug.Log("end combat");
+            return false;
         EndCombat();
+        return true;
     }
 
     private void EndCombat(){

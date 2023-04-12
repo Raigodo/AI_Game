@@ -85,11 +85,4 @@ public class UiEventHandler : MonoBehaviour
     public void ShowStateNodeExampleOnMap(StateTreeNode node){
         Game.Instance.GetInteractor<MapInteractor>().DisplayState(node);
     }
-
-    public void Update(){
-        if (Input.GetKeyDown(KeyCode.Space) && Game.Instance.CombatInProgress){
-            var _combatInteractor = Game.Instance.GetInteractor<CombatInteractor>();
-            _combatInteractor.ProcessAITurn();
-        }
-    }
 }
